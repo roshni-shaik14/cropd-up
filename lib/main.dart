@@ -16,6 +16,7 @@ class CropListing {
   final String location;
   final String farmer;
   final String category;
+
   bool available;
 
   CropListing({
@@ -189,7 +190,9 @@ class CropDUpApp extends StatelessWidget {
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(14),
-            borderSide: BorderSide(color: Colors.grey.shade200),
+            borderSide: BorderSide(
+              color: Colors.grey.shade200,
+            ),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(14),
@@ -238,11 +241,12 @@ class WelcomeScreen extends StatelessWidget {
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(24),
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 520),
+              constraints: const BoxConstraints(
+                maxWidth: 520,
+              ),
               child: Column(
                 children: [
                   const SizedBox(height: 35),
-
                   Container(
                     width: 105,
                     height: 105,
@@ -257,9 +261,7 @@ class WelcomeScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-
                   const SizedBox(height: 24),
-
                   const Text(
                     "CROP'D UP",
                     style: TextStyle(
@@ -268,9 +270,7 @@ class WelcomeScreen extends StatelessWidget {
                       letterSpacing: 1.5,
                     ),
                   ),
-
                   const SizedBox(height: 10),
-
                   Text(
                     'Better prices. Better choices.\n'
                     'More power to farmers.',
@@ -281,9 +281,7 @@ class WelcomeScreen extends StatelessWidget {
                       color: Colors.grey.shade700,
                     ),
                   ),
-
                   const SizedBox(height: 42),
-
                   _LargeRoleButton(
                     icon: '👨‍🌾',
                     title: "I'm a Farmer",
@@ -291,9 +289,7 @@ class WelcomeScreen extends StatelessWidget {
                     filled: true,
                     onTap: () => _openFarmer(context),
                   ),
-
                   const SizedBox(height: 16),
-
                   _LargeRoleButton(
                     icon: '🛒',
                     title: "I'm a Buyer",
@@ -301,9 +297,7 @@ class WelcomeScreen extends StatelessWidget {
                     filled: false,
                     onTap: () => _openBuyer(context),
                   ),
-
                   const SizedBox(height: 28),
-
                   TextButton.icon(
                     onPressed: () {
                       _showLanguageDialog(context);
@@ -311,9 +305,7 @@ class WelcomeScreen extends StatelessWidget {
                     icon: const Icon(Icons.language),
                     label: const Text('English  ▾'),
                   ),
-
                   const SizedBox(height: 25),
-
                   Text(
                     'Connecting farmers and buyers',
                     style: TextStyle(
@@ -445,7 +437,10 @@ class _LargeRoleButton extends StatelessWidget {
             ],
           ),
         ),
-        const Icon(Icons.arrow_forward_ios, size: 17),
+        const Icon(
+          Icons.arrow_forward_ios,
+          size: 17,
+        ),
       ],
     );
   }
@@ -473,7 +468,24 @@ class _FarmerShellState extends State<FarmerShell> {
   ];
 
   void _refresh() {
+    if (!mounted) return;
+
     setState(() {});
+  }
+
+  Future<void> _addCrop() async {
+    final added = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const AddCropScreen(),
+      ),
+    );
+
+    if (!mounted) return;
+
+    if (added == true) {
+      _refresh();
+    }
   }
 
   @override
@@ -489,7 +501,9 @@ class _FarmerShellState extends State<FarmerShell> {
       appBar: AppBar(
         title: Text(
           _titles[_index],
-          style: const TextStyle(fontWeight: FontWeight.bold),
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+          ),
         ),
         backgroundColor: Colors.green.shade700,
         foregroundColor: Colors.white,
@@ -504,25 +518,16 @@ class _FarmerShellState extends State<FarmerShell> {
                 ),
               );
             },
-            icon: const Icon(Icons.notifications_outlined),
+            icon: const Icon(
+              Icons.notifications_outlined,
+            ),
           ),
         ],
       ),
       body: pages[_index],
       floatingActionButton: _index == 0 || _index == 2
           ? FloatingActionButton.extended(
-              onPressed: () async {
-                final added = await Navigator.push<bool>(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const AddCropScreen(),
-                  ),
-                );
-
-                if (added == true) {
-                  _refresh();
-                }
-              },
+              onPressed: _addCrop,
               backgroundColor: Colors.green.shade700,
               foregroundColor: Colors.white,
               icon: const Icon(Icons.add),
@@ -584,14 +589,13 @@ class FarmerHome extends StatelessWidget {
       child: ListView(
         padding: const EdgeInsets.all(18),
         children: [
-          _GreetingCard(
+          const _GreetingCard(
             name: 'Farmer',
-            subtitle: 'Manage your crops and discover better prices.',
+            subtitle:
+                'Manage your crops and discover better prices.',
             icon: '👨‍🌾',
           ),
-
           const SizedBox(height: 18),
-
           Row(
             children: [
               Expanded(
@@ -612,9 +616,7 @@ class FarmerHome extends StatelessWidget {
               ),
             ],
           ),
-
           const SizedBox(height: 22),
-
           const Text(
             'My Crop Listings',
             style: TextStyle(
@@ -622,18 +624,21 @@ class FarmerHome extends StatelessWidget {
               fontWeight: FontWeight.bold,
             ),
           ),
-
           const SizedBox(height: 12),
-
-          ...cropListings.map(
-            (crop) => CropCard(
-              crop: crop,
-              showFarmer: false,
+          if (cropListings.isEmpty)
+            const _EmptyState(
+              icon: Icons.eco_outlined,
+              title: 'No crops yet',
+              message: 'Add your first crop listing to get started.',
+            )
+          else
+            ...cropListings.map(
+              (crop) => CropCard(
+                crop: crop,
+                showFarmer: false,
+              ),
             ),
-          ),
-
           const SizedBox(height: 20),
-
           const Text(
             'Smart Tools',
             style: TextStyle(
@@ -641,9 +646,7 @@ class FarmerHome extends StatelessWidget {
               fontWeight: FontWeight.bold,
             ),
           ),
-
           const SizedBox(height: 12),
-
           _ToolTile(
             icon: Icons.auto_awesome,
             title: 'AI Price Recommendation',
@@ -657,7 +660,6 @@ class FarmerHome extends StatelessWidget {
               );
             },
           ),
-
           _ToolTile(
             icon: Icons.storefront_outlined,
             title: 'Seed Shops',
@@ -671,7 +673,6 @@ class FarmerHome extends StatelessWidget {
               );
             },
           ),
-
           _ToolTile(
             icon: Icons.notifications_none,
             title: 'Notifications',
@@ -703,6 +704,96 @@ class FarmerCropsScreen extends StatelessWidget {
     required this.onRefresh,
   });
 
+  Future<void> _deleteCrop(
+    BuildContext context,
+    CropListing crop,
+  ) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('Delete Crop?'),
+          content: Text(
+            'Are you sure you want to delete ${crop.name}?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(dialogContext, false);
+              },
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () {
+                Navigator.pop(dialogContext, true);
+              },
+              child: const Text('Delete'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed != true) return;
+
+    cropListings.removeWhere(
+      (item) => item.id == crop.id,
+    );
+
+    onRefresh();
+
+    if (!context.mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('${crop.name} deleted successfully'),
+      ),
+    );
+  }
+
+  void _toggleAvailability(
+    BuildContext context,
+    CropListing crop,
+  ) {
+    crop.available = !crop.available;
+
+    onRefresh();
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          crop.available
+              ? '${crop.name} marked as available'
+              : '${crop.name} marked as sold',
+        ),
+      ),
+    );
+  }
+
+  Future<void> _editCrop(
+    BuildContext context,
+    CropListing crop,
+  ) async {
+    final updated = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => EditCropScreen(crop: crop),
+      ),
+    );
+
+    if (updated == true) {
+      onRefresh();
+
+      if (!context.mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Crop updated successfully'),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     if (cropListings.isEmpty) {
@@ -725,9 +816,77 @@ class FarmerCropsScreen extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         ...cropListings.map(
-          (crop) => CropCard(
-            crop: crop,
-            showFarmer: false,
+          (crop) => Card(
+            margin: const EdgeInsets.only(bottom: 12),
+            child: Padding(
+              padding: const EdgeInsets.all(8),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: CropCard(
+                      crop: crop,
+                      showFarmer: false,
+                    ),
+                  ),
+                  PopupMenuButton<String>(
+                    tooltip: 'Crop actions',
+                    onSelected: (value) {
+                      switch (value) {
+                        case 'edit':
+                          _editCrop(context, crop);
+                          break;
+                        case 'toggle':
+                          _toggleAvailability(
+                            context,
+                            crop,
+                          );
+                          break;
+                        case 'delete':
+                          _deleteCrop(
+                            context,
+                            crop,
+                          );
+                          break;
+                      }
+                    },
+                    itemBuilder: (context) => [
+                      const PopupMenuItem(
+                        value: 'edit',
+                        child: ListTile(
+                          leading: Icon(Icons.edit_outlined),
+                          title: Text('Edit Crop'),
+                        ),
+                      ),
+                      PopupMenuItem(
+                        value: 'toggle',
+                        child: ListTile(
+                          leading: Icon(
+                            crop.available
+                                ? Icons.check_circle_outline
+                                : Icons.refresh,
+                          ),
+                          title: Text(
+                            crop.available
+                                ? 'Mark as Sold'
+                                : 'Mark as Available',
+                          ),
+                        ),
+                      ),
+                      const PopupMenuItem(
+                        value: 'delete',
+                        child: ListTile(
+                          leading: Icon(
+                            Icons.delete_outline,
+                          ),
+                          title: Text('Delete Crop'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
       ],
@@ -783,18 +942,21 @@ class _AddCropScreenState extends State<AddCropScreen> {
       ),
     );
 
+    if (!mounted) return;
+
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('Crop listing added successfully 🌱'),
+        content: Text(
+          'Crop listing added successfully 🌱',
+        ),
       ),
     );
 
     Future.delayed(
       const Duration(milliseconds: 500),
       () {
-        if (mounted) {
-          Navigator.pop(context, true);
-        }
+        if (!mounted) return;
+        Navigator.pop(context, true);
       },
     );
   }
@@ -822,18 +984,14 @@ class _AddCropScreenState extends State<AddCropScreen> {
                 fontWeight: FontWeight.bold,
               ),
             ),
-
             const SizedBox(height: 8),
-
             Text(
               'Provide basic details about the crop you want to sell.',
               style: TextStyle(
                 color: Colors.grey.shade700,
               ),
             ),
-
             const SizedBox(height: 25),
-
             TextFormField(
               controller: _cropController,
               decoration: const InputDecoration(
@@ -848,9 +1006,7 @@ class _AddCropScreenState extends State<AddCropScreen> {
                 return null;
               },
             ),
-
             const SizedBox(height: 16),
-
             DropdownButtonFormField<String>(
               initialValue: _category,
               decoration: const InputDecoration(
@@ -887,16 +1043,16 @@ class _AddCropScreenState extends State<AddCropScreen> {
                 }
               },
             ),
-
             const SizedBox(height: 16),
-
             TextFormField(
               controller: _quantityController,
               keyboardType: TextInputType.number,
               decoration: const InputDecoration(
                 labelText: 'Quantity',
                 hintText: 'Example: 500',
-                prefixIcon: Icon(Icons.inventory_2_outlined),
+                prefixIcon: Icon(
+                  Icons.inventory_2_outlined,
+                ),
                 suffixText: 'kg',
               ),
               validator: (value) {
@@ -913,12 +1069,11 @@ class _AddCropScreenState extends State<AddCropScreen> {
                 return null;
               },
             ),
-
             const SizedBox(height: 16),
-
             TextFormField(
               controller: _priceController,
-              keyboardType: const TextInputType.numberWithOptions(
+              keyboardType:
+                  const TextInputType.numberWithOptions(
                 decimal: true,
               ),
               decoration: const InputDecoration(
@@ -941,15 +1096,15 @@ class _AddCropScreenState extends State<AddCropScreen> {
                 return null;
               },
             ),
-
             const SizedBox(height: 16),
-
             TextFormField(
               controller: _locationController,
               decoration: const InputDecoration(
                 labelText: 'Location',
                 hintText: 'Example: Bengaluru',
-                prefixIcon: Icon(Icons.location_on_outlined),
+                prefixIcon: Icon(
+                  Icons.location_on_outlined,
+                ),
               ),
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {
@@ -958,9 +1113,7 @@ class _AddCropScreenState extends State<AddCropScreen> {
                 return null;
               },
             ),
-
             const SizedBox(height: 28),
-
             SizedBox(
               height: 58,
               child: ElevatedButton.icon(
@@ -978,6 +1131,268 @@ class _AddCropScreenState extends State<AddCropScreen> {
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(15),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ============================================================
+// EDIT CROP
+// ============================================================
+
+class EditCropScreen extends StatefulWidget {
+  final CropListing crop;
+
+  const EditCropScreen({
+    super.key,
+    required this.crop,
+  });
+
+  @override
+  State<EditCropScreen> createState() => _EditCropScreenState();
+}
+
+class _EditCropScreenState extends State<EditCropScreen> {
+  final _formKey = GlobalKey<FormState>();
+
+  late final TextEditingController _cropController;
+  late final TextEditingController _quantityController;
+  late final TextEditingController _priceController;
+  late final TextEditingController _locationController;
+
+  late String _category;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _cropController = TextEditingController(
+      text: widget.crop.name,
+    );
+
+    _quantityController = TextEditingController(
+      text: widget.crop.quantity,
+    );
+
+    _priceController = TextEditingController(
+      text: widget.crop.price,
+    );
+
+    _locationController = TextEditingController(
+      text: widget.crop.location,
+    );
+
+    _category = widget.crop.category;
+  }
+
+  @override
+  void dispose() {
+    _cropController.dispose();
+    _quantityController.dispose();
+    _priceController.dispose();
+    _locationController.dispose();
+    super.dispose();
+  }
+
+  void _saveChanges() {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    final index = cropListings.indexWhere(
+      (item) => item.id == widget.crop.id,
+    );
+
+    if (index != -1) {
+      cropListings[index] = CropListing(
+        id: widget.crop.id,
+        name: _cropController.text.trim(),
+        quantity: _quantityController.text.trim(),
+        price: _priceController.text.trim(),
+        location: _locationController.text.trim(),
+        farmer: widget.crop.farmer,
+        category: _category,
+        available: widget.crop.available,
+      );
+    }
+
+    Navigator.pop(context, true);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text(
+          'Edit Crop',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        backgroundColor: Colors.green.shade700,
+        foregroundColor: Colors.white,
+      ),
+      body: Form(
+        key: _formKey,
+        child: ListView(
+          padding: const EdgeInsets.all(18),
+          children: [
+            const Text(
+              'Update Crop Details 🌱',
+              style: TextStyle(
+                fontSize: 25,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 22),
+            TextFormField(
+              controller: _cropController,
+              decoration: const InputDecoration(
+                labelText: 'Crop Name',
+                prefixIcon: Icon(Icons.eco),
+              ),
+              validator: (value) {
+                if (value == null || value.trim().isEmpty) {
+                  return 'Enter the crop name';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 16),
+            DropdownButtonFormField<String>(
+              initialValue: _category,
+              decoration: const InputDecoration(
+                labelText: 'Category',
+                prefixIcon: Icon(
+                  Icons.category_outlined,
+                ),
+              ),
+              items: const [
+                DropdownMenuItem(
+                  value: 'Vegetables',
+                  child: Text('Vegetables'),
+                ),
+                DropdownMenuItem(
+                  value: 'Fruits',
+                  child: Text('Fruits'),
+                ),
+                DropdownMenuItem(
+                  value: 'Grains',
+                  child: Text('Grains'),
+                ),
+                DropdownMenuItem(
+                  value: 'Pulses',
+                  child: Text('Pulses'),
+                ),
+                DropdownMenuItem(
+                  value: 'Other',
+                  child: Text('Other'),
+                ),
+              ],
+              onChanged: (value) {
+                if (value != null) {
+                  setState(() {
+                    _category = value;
+                  });
+                }
+              },
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _quantityController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: 'Quantity',
+                suffixText: 'kg',
+                prefixIcon: Icon(
+                  Icons.inventory_2_outlined,
+                ),
+              ),
+              validator: (value) {
+                if (value == null || value.trim().isEmpty) {
+                  return 'Enter the quantity';
+                }
+
+                final number = double.tryParse(value);
+
+                if (number == null || number <= 0) {
+                  return 'Enter a valid quantity';
+                }
+
+                return null;
+              },
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _priceController,
+              keyboardType:
+                  const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
+              decoration: const InputDecoration(
+                labelText: 'Expected Price',
+                suffixText: '/kg',
+                prefixIcon: Icon(
+                  Icons.currency_rupee,
+                ),
+              ),
+              validator: (value) {
+                if (value == null || value.trim().isEmpty) {
+                  return 'Enter the price';
+                }
+
+                final number = double.tryParse(value);
+
+                if (number == null || number <= 0) {
+                  return 'Enter a valid price';
+                }
+
+                return null;
+              },
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _locationController,
+              decoration: const InputDecoration(
+                labelText: 'Location',
+                prefixIcon: Icon(
+                  Icons.location_on_outlined,
+                ),
+              ),
+              validator: (value) {
+                if (value == null || value.trim().isEmpty) {
+                  return 'Enter the location';
+                }
+
+                return null;
+              },
+            ),
+            const SizedBox(height: 28),
+            SizedBox(
+              height: 56,
+              child: ElevatedButton.icon(
+                onPressed: _saveChanges,
+                icon: const Icon(Icons.save_outlined),
+                label: const Text(
+                  'Save Changes',
+                  style: TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor:
+                      Colors.green.shade700,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius:
+                        BorderRadius.circular(15),
                   ),
                 ),
               ),
@@ -1021,7 +1436,9 @@ class _BuyerShellState extends State<BuyerShell> {
             'My Requests',
             'Profile',
           ][_index],
-          style: const TextStyle(fontWeight: FontWeight.bold),
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+          ),
         ),
         backgroundColor: Colors.green.shade700,
         foregroundColor: Colors.white,
@@ -1031,11 +1448,14 @@ class _BuyerShellState extends State<BuyerShell> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => const NotificationsScreen(),
+                  builder: (_) =>
+                      const NotificationsScreen(),
                 ),
               );
             },
-            icon: const Icon(Icons.notifications_outlined),
+            icon: const Icon(
+              Icons.notifications_outlined,
+            ),
           ),
         ],
       ),
@@ -1092,13 +1512,20 @@ class _BuyerHomeState extends State<BuyerHome> {
   List<CropListing> get _filtered {
     return cropListings.where((crop) {
       final matchesSearch =
-          crop.name.toLowerCase().contains(_query.toLowerCase()) ||
-          crop.location.toLowerCase().contains(_query.toLowerCase());
+          crop.name.toLowerCase().contains(
+                _query.toLowerCase(),
+              ) ||
+          crop.location.toLowerCase().contains(
+                _query.toLowerCase(),
+              );
 
       final matchesCategory =
-          _category == 'All' || crop.category == _category;
+          _category == 'All' ||
+          crop.category == _category;
 
-      return matchesSearch && matchesCategory && crop.available;
+      return matchesSearch &&
+          matchesCategory &&
+          crop.available;
     }).toList();
   }
 
@@ -1109,12 +1536,11 @@ class _BuyerHomeState extends State<BuyerHome> {
       children: [
         const _GreetingCard(
           name: 'Buyer',
-          subtitle: 'Find fresh crops directly from farmers.',
+          subtitle:
+              'Find fresh crops directly from farmers.',
           icon: '🛒',
         ),
-
         const SizedBox(height: 18),
-
         TextField(
           decoration: const InputDecoration(
             hintText: 'Search crops or locations...',
@@ -1126,9 +1552,7 @@ class _BuyerHomeState extends State<BuyerHome> {
             });
           },
         ),
-
         const SizedBox(height: 14),
-
         SizedBox(
           height: 42,
           child: ListView(
@@ -1143,31 +1567,36 @@ class _BuyerHomeState extends State<BuyerHome> {
               ),
               _CategoryChip(
                 label: 'Vegetables',
-                selected: _category == 'Vegetables',
+                selected:
+                    _category == 'Vegetables',
                 onTap: () {
-                  setState(() => _category = 'Vegetables');
+                  setState(
+                    () => _category = 'Vegetables',
+                  );
                 },
               ),
               _CategoryChip(
                 label: 'Fruits',
                 selected: _category == 'Fruits',
                 onTap: () {
-                  setState(() => _category = 'Fruits');
+                  setState(
+                    () => _category = 'Fruits',
+                  );
                 },
               ),
               _CategoryChip(
                 label: 'Grains',
                 selected: _category == 'Grains',
                 onTap: () {
-                  setState(() => _category = 'Grains');
+                  setState(
+                    () => _category = 'Grains',
+                  );
                 },
               ),
             ],
           ),
         ),
-
         const SizedBox(height: 22),
-
         Text(
           '${_filtered.length} crops available',
           style: TextStyle(
@@ -1175,14 +1604,13 @@ class _BuyerHomeState extends State<BuyerHome> {
             color: Colors.grey.shade700,
           ),
         ),
-
         const SizedBox(height: 10),
-
         if (_filtered.isEmpty)
           const _EmptyState(
             icon: Icons.search_off,
             title: 'No crops found',
-            message: 'Try another crop or location.',
+            message:
+                'Try another crop or location.',
           )
         else
           ..._filtered.map(
@@ -1236,7 +1664,9 @@ class CropDetailsScreen extends StatelessWidget {
                 children: [
                   Text(
                     _cropEmoji(crop.name),
-                    style: const TextStyle(fontSize: 60),
+                    style: const TextStyle(
+                      fontSize: 60,
+                    ),
                   ),
                   const SizedBox(height: 12),
                   Text(
@@ -1257,45 +1687,44 @@ class CropDetailsScreen extends StatelessWidget {
               ),
             ),
           ),
-
           const SizedBox(height: 15),
-
           _DetailRow(
             icon: Icons.inventory_2_outlined,
             label: 'Quantity',
             value: '${crop.quantity} kg',
           ),
-
           _DetailRow(
             icon: Icons.currency_rupee,
             label: 'Price',
             value: '₹${crop.price}/kg',
           ),
-
           _DetailRow(
             icon: Icons.location_on_outlined,
             label: 'Location',
             value: crop.location,
           ),
-
           _DetailRow(
             icon: Icons.person_outline,
             label: 'Farmer',
             value: crop.farmer,
           ),
-
           const SizedBox(height: 25),
-
           SizedBox(
             height: 56,
             child: ElevatedButton.icon(
-              onPressed: () {
-                _showRequestDialog(context);
-              },
-              icon: const Icon(Icons.handshake_outlined),
-              label: const Text(
-                'Request This Crop',
-                style: TextStyle(
+              onPressed: crop.available
+                  ? () {
+                      _showRequestDialog(context);
+                    }
+                  : null,
+              icon: const Icon(
+                Icons.handshake_outlined,
+              ),
+              label: Text(
+                crop.available
+                    ? 'Request This Crop'
+                    : 'Crop Sold',
+                style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 17,
                 ),
@@ -1317,7 +1746,8 @@ class CropDetailsScreen extends StatelessWidget {
       builder: (_) => AlertDialog(
         title: const Text('Request Sent'),
         content: Text(
-          'Your request for ${crop.name} has been recorded in this demo.',
+          'Your request for ${crop.name} has been '
+          'recorded in this demo.',
         ),
         actions: [
           TextButton(
@@ -1349,35 +1779,34 @@ class MarketPricesScreen extends StatelessWidget {
             fontWeight: FontWeight.bold,
           ),
         ),
-
         const SizedBox(height: 7),
-
         Text(
           'Indicative market prices for demonstration.',
           style: TextStyle(
             color: Colors.grey.shade700,
           ),
         ),
-
         const SizedBox(height: 20),
-
         ...marketPrices.map(
           (item) => Card(
-            margin: const EdgeInsets.only(bottom: 12),
+            margin: const EdgeInsets.only(
+              bottom: 12,
+            ),
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Row(
                 children: [
                   CircleAvatar(
-                    backgroundColor: Colors.green.shade100,
+                    backgroundColor:
+                        Colors.green.shade100,
                     child: Text(
                       _cropEmoji(item.crop),
-                      style: const TextStyle(fontSize: 22),
+                      style: const TextStyle(
+                        fontSize: 22,
+                      ),
                     ),
                   ),
-
                   const SizedBox(width: 14),
-
                   Expanded(
                     child: Column(
                       crossAxisAlignment:
@@ -1393,14 +1822,15 @@ class MarketPricesScreen extends StatelessWidget {
                         const SizedBox(height: 4),
                         Text(
                           '₹${item.minPrice.toStringAsFixed(0)} - '
-                          '₹${item.maxPrice.toStringAsFixed(0)}/${item.unit}',
+                          '₹${item.maxPrice.toStringAsFixed(0)}/'
+                          '${item.unit}',
                         ),
                       ],
                     ),
                   ),
-
                   Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
+                    crossAxisAlignment:
+                        CrossAxisAlignment.end,
                     children: [
                       Text(
                         '₹${item.averagePrice.toStringAsFixed(0)}',
@@ -1427,23 +1857,26 @@ class MarketPricesScreen extends StatelessWidget {
             ),
           ),
         ),
-
         const SizedBox(height: 12),
 
+        // FIXED:
+        // There is no "crop" variable in this screen.
+        // This card uses a fixed informational color.
         Card(
           color: Colors.green.shade50,
           child: const Padding(
             padding: EdgeInsets.all(16),
             child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment:
+                  CrossAxisAlignment.start,
               children: [
                 Icon(Icons.info_outline),
                 SizedBox(width: 12),
                 Expanded(
                   child: Text(
                     'These values are demo data for the MVP. '
-                    'Live market-price integration will be connected '
-                    'through the backend later.',
+                    'Live market-price integration will be '
+                    'connected through the backend later.',
                   ),
                 ),
               ],
@@ -1463,11 +1896,13 @@ class AIPriceScreen extends StatefulWidget {
   const AIPriceScreen({super.key});
 
   @override
-  State<AIPriceScreen> createState() => _AIPriceScreenState();
+  State<AIPriceScreen> createState() =>
+      _AIPriceScreenState();
 }
 
 class _AIPriceScreenState extends State<AIPriceScreen> {
   String _crop = 'Tomato';
+
   final _quantityController =
       TextEditingController(text: '500');
 
@@ -1485,10 +1920,18 @@ class _AIPriceScreenState extends State<AIPriceScreen> {
   }
 
   @override
+  void dispose() {
+    _quantityController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('AI Price Recommendation'),
+        title: const Text(
+          'AI Price Recommendation',
+        ),
         backgroundColor: Colors.green.shade700,
         foregroundColor: Colors.white,
       ),
@@ -1510,8 +1953,9 @@ class _AIPriceScreenState extends State<AIPriceScreen> {
                   SizedBox(width: 14),
                   Expanded(
                     child: Text(
-                      'AI-assisted price guidance can help farmers '
-                      'understand a reasonable selling range.',
+                      'AI-assisted price guidance can help '
+                      'farmers understand a reasonable '
+                      'selling range.',
                       style: TextStyle(
                         fontSize: 15,
                         height: 1.4,
@@ -1522,9 +1966,7 @@ class _AIPriceScreenState extends State<AIPriceScreen> {
               ),
             ),
           ),
-
           const SizedBox(height: 22),
-
           DropdownButtonFormField<String>(
             initialValue: _crop,
             decoration: const InputDecoration(
@@ -1533,7 +1975,7 @@ class _AIPriceScreenState extends State<AIPriceScreen> {
             ),
             items: marketPrices
                 .map(
-                  (item) => DropdownMenuItem(
+                  (item) => DropdownMenuItem<String>(
                     value: item.crop,
                     child: Text(item.crop),
                   ),
@@ -1545,33 +1987,32 @@ class _AIPriceScreenState extends State<AIPriceScreen> {
               }
             },
           ),
-
           const SizedBox(height: 16),
-
           TextField(
             controller: _quantityController,
             keyboardType: TextInputType.number,
             decoration: const InputDecoration(
               labelText: 'Quantity',
               suffixText: 'kg',
-              prefixIcon:
-                  Icon(Icons.inventory_2_outlined),
+              prefixIcon: Icon(
+                Icons.inventory_2_outlined,
+              ),
             ),
           ),
-
           const SizedBox(height: 22),
-
           SizedBox(
             height: 55,
             child: ElevatedButton.icon(
               onPressed: _calculate,
-              icon: const Icon(Icons.auto_awesome),
-              label: const Text('Generate Recommendation'),
+              icon: const Icon(
+                Icons.auto_awesome,
+              ),
+              label: const Text(
+                'Generate Recommendation',
+              ),
             ),
           ),
-
           const SizedBox(height: 25),
-
           Card(
             child: Padding(
               padding: const EdgeInsets.all(22),
@@ -1594,8 +2035,8 @@ class _AIPriceScreenState extends State<AIPriceScreen> {
                   ),
                   const SizedBox(height: 15),
                   const Text(
-                    'Indicative recommendation based on demo '
-                    'market data.',
+                    'Indicative recommendation based on '
+                    'demo market data.',
                     textAlign: TextAlign.center,
                   ),
                 ],
@@ -1636,10 +2077,13 @@ class SeedShopsScreen extends StatelessWidget {
           const SizedBox(height: 18),
           ...seedShops.map(
             (shop) => Card(
-              margin: const EdgeInsets.only(bottom: 12),
+              margin: const EdgeInsets.only(
+                bottom: 12,
+              ),
               child: ListTile(
                 leading: CircleAvatar(
-                  backgroundColor: Colors.green.shade100,
+                  backgroundColor:
+                      Colors.green.shade100,
                   child: const Icon(Icons.store),
                 ),
                 title: Text(
@@ -1649,7 +2093,8 @@ class SeedShopsScreen extends StatelessWidget {
                   ),
                 ),
                 subtitle: Text(
-                  '${shop.category}\n${shop.location}',
+                  '${shop.category}\n'
+                  '${shop.location}',
                 ),
                 isThreeLine: true,
                 trailing: Row(
@@ -1712,7 +2157,8 @@ class NotificationsScreen extends StatelessWidget {
             (notification) => Card(
               child: ListTile(
                 leading: CircleAvatar(
-                  backgroundColor: Colors.green.shade100,
+                  backgroundColor:
+                      Colors.green.shade100,
                   child: Icon(notification.$1),
                 ),
                 title: Text(
@@ -1780,7 +2226,6 @@ class ProfileScreen extends StatelessWidget {
       padding: const EdgeInsets.all(18),
       children: [
         const SizedBox(height: 10),
-
         CircleAvatar(
           radius: 48,
           backgroundColor: Colors.green.shade100,
@@ -1789,9 +2234,7 @@ class ProfileScreen extends StatelessWidget {
             style: const TextStyle(fontSize: 42),
           ),
         ),
-
         const SizedBox(height: 14),
-
         Center(
           child: Text(
             'Local $role',
@@ -1801,21 +2244,17 @@ class ProfileScreen extends StatelessWidget {
             ),
           ),
         ),
-
         const SizedBox(height: 25),
-
         _SettingsTile(
           icon: Icons.person_outline,
           title: 'Account Details',
           onTap: () {},
         ),
-
         _SettingsTile(
           icon: Icons.language,
           title: 'Language',
           onTap: () {},
         ),
-
         _SettingsTile(
           icon: Icons.notifications_outlined,
           title: 'Notifications',
@@ -1823,18 +2262,17 @@ class ProfileScreen extends StatelessWidget {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (_) => const NotificationsScreen(),
+                builder: (_) =>
+                    const NotificationsScreen(),
               ),
             );
           },
         ),
-
         _SettingsTile(
           icon: Icons.help_outline,
           title: 'Help & Support',
           onTap: () {},
         ),
-
         _SettingsTile(
           icon: Icons.info_outline,
           title: 'About Crop\'D UP',
@@ -1968,6 +2406,10 @@ class _StatCard extends StatelessWidget {
   }
 }
 
+// ============================================================
+// CROP CARD
+// ============================================================
+
 class CropCard extends StatelessWidget {
   final CropListing crop;
   final bool showFarmer;
@@ -1998,18 +2440,19 @@ class CropCard extends StatelessWidget {
                 height: 58,
                 decoration: BoxDecoration(
                   color: Colors.green.shade100,
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius:
+                      BorderRadius.circular(16),
                 ),
                 child: Center(
                   child: Text(
                     _cropEmoji(crop.name),
-                    style: const TextStyle(fontSize: 30),
+                    style: const TextStyle(
+                      fontSize: 30,
+                    ),
                   ),
                 ),
               ),
-
               const SizedBox(width: 14),
-
               Expanded(
                 child: Column(
                   crossAxisAlignment:
@@ -2022,25 +2465,21 @@ class CropCard extends StatelessWidget {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-
                     const SizedBox(height: 5),
-
                     Text(
-                      '${crop.quantity} kg • ₹${crop.price}/kg',
+                      '${crop.quantity} kg • '
+                      '₹${crop.price}/kg',
                       style: TextStyle(
                         color: Colors.grey.shade700,
                       ),
                     ),
-
                     const SizedBox(height: 4),
-
                     Text(
                       '📍 ${crop.location}',
                       style: TextStyle(
                         color: Colors.grey.shade700,
                       ),
                     ),
-
                     if (showFarmer) ...[
                       const SizedBox(height: 4),
                       Text(
@@ -2050,18 +2489,19 @@ class CropCard extends StatelessWidget {
                         ),
                       ),
                     ],
-
                     const SizedBox(height: 8),
-
                     Row(
                       children: [
                         Container(
-                          padding: const EdgeInsets.symmetric(
+                          padding:
+                              const EdgeInsets.symmetric(
                             horizontal: 9,
                             vertical: 5,
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.green.shade50,
+                            color: crop.available
+                                ? Colors.green.shade50
+                                : Colors.grey.shade200,
                             borderRadius:
                                 BorderRadius.circular(20),
                           ),
@@ -2070,9 +2510,12 @@ class CropCard extends StatelessWidget {
                                 ? 'Available'
                                 : 'Sold',
                             style: TextStyle(
-                              color: Colors.green.shade800,
+                              color: crop.available
+                                  ? Colors.green.shade800
+                                  : Colors.grey.shade700,
                               fontSize: 12,
-                              fontWeight: FontWeight.bold,
+                              fontWeight:
+                                  FontWeight.bold,
                             ),
                           ),
                         ),
@@ -2095,6 +2538,10 @@ class CropCard extends StatelessWidget {
   }
 }
 
+// ============================================================
+// TOOL TILE
+// ============================================================
+
 class _ToolTile extends StatelessWidget {
   final IconData icon;
   final String title;
@@ -2113,12 +2560,16 @@ class _ToolTile extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.only(bottom: 10),
       child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(
+        contentPadding:
+            const EdgeInsets.symmetric(
           horizontal: 16,
           vertical: 5,
         ),
         leading: CircleAvatar(
           backgroundColor: Colors.green.shade100,
+
+          // FIXED:
+          // _ToolTile has no "crop" variable.
           child: Icon(
             icon,
             color: Colors.green.shade800,
@@ -2131,12 +2582,19 @@ class _ToolTile extends StatelessWidget {
           ),
         ),
         subtitle: Text(subtitle),
-        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+        trailing: const Icon(
+          Icons.arrow_forward_ios,
+          size: 16,
+        ),
         onTap: onTap,
       ),
     );
   }
 }
+
+// ============================================================
+// SETTINGS TILE
+// ============================================================
 
 class _SettingsTile extends StatelessWidget {
   final IconData icon;
@@ -2168,6 +2626,10 @@ class _SettingsTile extends StatelessWidget {
     );
   }
 }
+
+// ============================================================
+// DETAIL ROW
+// ============================================================
 
 class _DetailRow extends StatelessWidget {
   final IconData icon;
@@ -2208,6 +2670,10 @@ class _DetailRow extends StatelessWidget {
   }
 }
 
+// ============================================================
+// CATEGORY CHIP
+// ============================================================
+
 class _CategoryChip extends StatelessWidget {
   final String label;
   final bool selected;
@@ -2232,6 +2698,10 @@ class _CategoryChip extends StatelessWidget {
   }
 }
 
+// ============================================================
+// EMPTY STATE
+// ============================================================
+
 class _EmptyState extends StatelessWidget {
   final IconData icon;
   final String title;
@@ -2246,7 +2716,8 @@ class _EmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 50),
+      padding:
+          const EdgeInsets.symmetric(vertical: 50),
       child: Column(
         children: [
           Icon(
