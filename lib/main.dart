@@ -4,6 +4,39 @@ void main() {
   runApp(const CropDUpApp());
 }
 
+// ============================================================
+// MODEL
+// ============================================================
+
+class CropListing {
+  final String name;
+  final String quantity;
+  final String price;
+  final String location;
+
+  CropListing({
+    required this.name,
+    required this.quantity,
+    required this.price,
+    required this.location,
+  });
+}
+
+// Temporary in-memory storage.
+// Later we will replace this with a real backend/database.
+final List<CropListing> cropListings = [
+  CropListing(
+    name: "Tomato",
+    quantity: "500",
+    price: "27",
+    location: "Bengaluru",
+  ),
+];
+
+// ============================================================
+// APP
+// ============================================================
+
 class CropDUpApp extends StatelessWidget {
   const CropDUpApp({super.key});
 
@@ -15,11 +48,16 @@ class CropDUpApp extends StatelessWidget {
       theme: ThemeData(
         useMaterial3: true,
         fontFamily: 'Arial',
+        colorSchemeSeed: Colors.green,
       ),
       home: const WelcomeScreen(),
     );
   }
 }
+
+// ============================================================
+// WELCOME SCREEN
+// ============================================================
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
@@ -69,7 +107,8 @@ class WelcomeScreen extends StatelessWidget {
                   const SizedBox(height: 10),
 
                   const Text(
-                    'Better prices. Better choices.\nMore power to farmers.',
+                    'Better prices. Better choices.\n'
+                    'More power to farmers.',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 17,
@@ -85,13 +124,14 @@ class WelcomeScreen extends StatelessWidget {
                     height: 60,
                     child: ElevatedButton.icon(
                       onPressed: () {
-                       Navigator.push(
-                         context,
-                         MaterialPageRoute(
-                           builder: (context) => const FarmerDashboard(),
-                        ),
-                     );
-                   },
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                const FarmerDashboard(),
+                          ),
+                        );
+                      },
                       icon: const Text(
                         '👨‍🌾',
                         style: TextStyle(fontSize: 24),
@@ -120,7 +160,15 @@ class WelcomeScreen extends StatelessWidget {
                     width: double.infinity,
                     height: 60,
                     child: OutlinedButton.icon(
-                      onPressed: () {},
+                      onPressed: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              "Buyer section coming next!",
+                            ),
+                          ),
+                        );
+                      },
                       icon: const Text(
                         '🛒',
                         style: TextStyle(fontSize: 24),
@@ -147,7 +195,7 @@ class WelcomeScreen extends StatelessWidget {
 
                   const SizedBox(height: 35),
 
-                  // Language selector
+                  // Language
                   TextButton.icon(
                     onPressed: () {},
                     icon: const Icon(Icons.language),
@@ -167,8 +215,33 @@ class WelcomeScreen extends StatelessWidget {
     );
   }
 }
-class FarmerDashboard extends StatelessWidget {
+
+// ============================================================
+// FARMER DASHBOARD
+// ============================================================
+
+class FarmerDashboard extends StatefulWidget {
   const FarmerDashboard({super.key});
+
+  @override
+  State<FarmerDashboard> createState() =>
+      _FarmerDashboardState();
+}
+
+class _FarmerDashboardState extends State<FarmerDashboard> {
+  Future<void> _openAddCrop() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const AddCropScreen(),
+      ),
+    );
+
+    // Refresh dashboard after adding a crop.
+    if (result == true && mounted) {
+      setState(() {});
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -181,6 +254,7 @@ class FarmerDashboard extends StatelessWidget {
         backgroundColor: Colors.green.shade700,
         foregroundColor: Colors.white,
       ),
+
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -206,19 +280,12 @@ class FarmerDashboard extends StatelessWidget {
 
             const SizedBox(height: 25),
 
-            // Add crop
+            // Add crop button
             SizedBox(
               width: double.infinity,
               height: 60,
               child: ElevatedButton.icon(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const AddCropScreen(),
-                     ),
-                   );
-                 },
+                onPressed: _openAddCrop,
                 icon: const Icon(Icons.add),
                 label: const Text(
                   "Add My Crop",
@@ -249,64 +316,30 @@ class FarmerDashboard extends StatelessWidget {
 
             const SizedBox(height: 12),
 
-            // Demo crop
-            Card(
-              elevation: 2,
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      "🍅 Tomato",
-                      style: TextStyle(
-                        fontSize: 21,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+            // =================================================
+            // DYNAMIC CROP LIST
+            // =================================================
 
-                    const SizedBox(height: 8),
-
-                    const Text(
-                      "Quantity: 500 kg",
-                      style: TextStyle(fontSize: 16),
-                    ),
-
-                    const SizedBox(height: 4),
-
-                    const Text(
-                      "Your price: ₹27/kg",
-                      style: TextStyle(fontSize: 16),
-                    ),
-
-                    const SizedBox(height: 4),
-
-                    Text(
-                      "AI suggested: ₹25–₹27/kg",
+            if (cropListings.isEmpty)
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Center(
+                    child: Text(
+                      "No crop listings yet.\nAdd your first crop!",
+                      textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 16,
-                        color: Colors.green.shade700,
-                        fontWeight: FontWeight.bold,
+                        color: Colors.grey.shade700,
                       ),
                     ),
-
-                    const SizedBox(height: 12),
-
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.circle,
-                          size: 12,
-                          color: Colors.green.shade600,
-                        ),
-                        const SizedBox(width: 6),
-                        const Text("Available"),
-                      ],
-                    ),
-                  ],
+                  ),
                 ),
+              )
+            else
+              ...cropListings.map(
+                (crop) => _CropCard(crop: crop),
               ),
-            ),
 
             const SizedBox(height: 25),
 
@@ -326,15 +359,33 @@ class FarmerDashboard extends StatelessWidget {
                   child: _ActionCard(
                     icon: Icons.trending_up,
                     title: "Market Prices",
-                    onTap: () {},
+                    onTap: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            "Market Prices feature coming next!",
+                          ),
+                        ),
+                      );
+                    },
                   ),
                 ),
+
                 const SizedBox(width: 12),
+
                 Expanded(
                   child: _ActionCard(
                     icon: Icons.store,
                     title: "Seed Shops",
-                    onTap: () {},
+                    onTap: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            "Seed Shops feature coming next!",
+                          ),
+                        ),
+                      );
+                    },
                   ),
                 ),
               ],
@@ -345,6 +396,91 @@ class FarmerDashboard extends StatelessWidget {
     );
   }
 }
+
+// ============================================================
+// CROP CARD
+// ============================================================
+
+class _CropCard extends StatelessWidget {
+  final CropListing crop;
+
+  const _CropCard({
+    required this.crop,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 2,
+      margin: const EdgeInsets.only(bottom: 12),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "🌱 ${crop.name}",
+              style: const TextStyle(
+                fontSize: 21,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+
+            const SizedBox(height: 8),
+
+            Text(
+              "Quantity: ${crop.quantity} kg",
+              style: const TextStyle(fontSize: 16),
+            ),
+
+            const SizedBox(height: 4),
+
+            Text(
+              "Your price: ₹${crop.price}/kg",
+              style: const TextStyle(fontSize: 16),
+            ),
+
+            const SizedBox(height: 4),
+
+            Text(
+              "Location: ${crop.location}",
+              style: const TextStyle(fontSize: 16),
+            ),
+
+            const SizedBox(height: 8),
+
+            Text(
+              "AI suggested: ₹25–₹27/kg",
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.green.shade700,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+
+            const SizedBox(height: 12),
+
+            Row(
+              children: [
+                Icon(
+                  Icons.circle,
+                  size: 12,
+                  color: Colors.green.shade600,
+                ),
+                const SizedBox(width: 6),
+                const Text("Available"),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ============================================================
+// QUICK ACTION CARD
+// ============================================================
 
 class _ActionCard extends StatelessWidget {
   final IconData icon;
@@ -372,7 +508,9 @@ class _ActionCard extends StatelessWidget {
                 size: 36,
                 color: Colors.green.shade700,
               ),
+
               const SizedBox(height: 10),
+
               Text(
                 title,
                 textAlign: TextAlign.center,
@@ -388,20 +526,32 @@ class _ActionCard extends StatelessWidget {
   }
 }
 
+// ============================================================
+// ADD CROP SCREEN
+// ============================================================
+
 class AddCropScreen extends StatefulWidget {
   const AddCropScreen({super.key});
 
   @override
-  State<AddCropScreen> createState() => _AddCropScreenState();
+  State<AddCropScreen> createState() =>
+      _AddCropScreenState();
 }
 
 class _AddCropScreenState extends State<AddCropScreen> {
   final _formKey = GlobalKey<FormState>();
 
-  final TextEditingController _cropController = TextEditingController();
-  final TextEditingController _quantityController = TextEditingController();
-  final TextEditingController _priceController = TextEditingController();
-  final TextEditingController _locationController = TextEditingController();
+  final TextEditingController _cropController =
+      TextEditingController();
+
+  final TextEditingController _quantityController =
+      TextEditingController();
+
+  final TextEditingController _priceController =
+      TextEditingController();
+
+  final TextEditingController _locationController =
+      TextEditingController();
 
   @override
   void dispose() {
@@ -412,20 +562,42 @@ class _AddCropScreenState extends State<AddCropScreen> {
     super.dispose();
   }
 
-  void _addListing() {
-    if (_formKey.currentState!.validate()) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Crop listing added successfully!"),
-        ),
-      );
+  // ==========================================================
+  // ADD LISTING
+  // ==========================================================
 
-      Future.delayed(const Duration(milliseconds: 800), () {
-        if (mounted) {
-          Navigator.pop(context);
-        }
-      });
+  void _addListing() {
+    if (!_formKey.currentState!.validate()) {
+      return;
     }
+
+    // ACTUALLY SAVE THE CROP
+    cropListings.add(
+      CropListing(
+        name: _cropController.text.trim(),
+        quantity: _quantityController.text.trim(),
+        price: _priceController.text.trim(),
+        location: _locationController.text.trim(),
+      ),
+    );
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text(
+          "Crop listing added successfully! 🌱",
+        ),
+      ),
+    );
+
+    // Return to Farmer Dashboard
+    Future.delayed(
+      const Duration(milliseconds: 600),
+      () {
+        if (mounted) {
+          Navigator.pop(context, true);
+        }
+      },
+    );
   }
 
   @override
@@ -434,17 +606,21 @@ class _AddCropScreenState extends State<AddCropScreen> {
       appBar: AppBar(
         title: const Text(
           "Add My Crop",
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+          ),
         ),
         backgroundColor: Colors.green.shade700,
         foregroundColor: Colors.white,
       ),
+
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Form(
           key: _formKey,
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment:
+                CrossAxisAlignment.start,
             children: [
               const Text(
                 "Create a Crop Listing 🌱",
@@ -466,18 +642,22 @@ class _AddCropScreenState extends State<AddCropScreen> {
 
               const SizedBox(height: 25),
 
+              // Crop name
               TextFormField(
                 controller: _cropController,
                 decoration: InputDecoration(
                   labelText: "Crop Name",
                   hintText: "Example: Tomato",
-                  prefixIcon: const Icon(Icons.eco),
+                  prefixIcon:
+                      const Icon(Icons.eco),
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius:
+                        BorderRadius.circular(14),
                   ),
                 ),
                 validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
+                  if (value == null ||
+                      value.trim().isEmpty) {
                     return "Please enter the crop name";
                   }
                   return null;
@@ -486,28 +666,36 @@ class _AddCropScreenState extends State<AddCropScreen> {
 
               const SizedBox(height: 18),
 
+              // Quantity
               TextFormField(
                 controller: _quantityController,
-                keyboardType: TextInputType.number,
+                keyboardType:
+                    TextInputType.number,
                 decoration: InputDecoration(
                   labelText: "Quantity",
                   hintText: "Example: 500",
-                  prefixIcon: const Icon(Icons.inventory_2),
+                  prefixIcon:
+                      const Icon(Icons.inventory_2),
                   suffixText: "kg",
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius:
+                        BorderRadius.circular(14),
                   ),
                 ),
                 validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
+                  if (value == null ||
+                      value.trim().isEmpty) {
                     return "Please enter the quantity";
                   }
 
-                  if (double.tryParse(value) == null) {
+                  final number =
+                      double.tryParse(value);
+
+                  if (number == null) {
                     return "Enter a valid number";
                   }
 
-                  if (double.parse(value) <= 0) {
+                  if (number <= 0) {
                     return "Quantity must be greater than 0";
                   }
 
@@ -517,30 +705,38 @@ class _AddCropScreenState extends State<AddCropScreen> {
 
               const SizedBox(height: 18),
 
+              // Price
               TextFormField(
                 controller: _priceController,
-                keyboardType: const TextInputType.numberWithOptions(
+                keyboardType:
+                    const TextInputType.numberWithOptions(
                   decimal: true,
                 ),
                 decoration: InputDecoration(
                   labelText: "Expected Price",
                   hintText: "Example: 27",
-                  prefixIcon: const Icon(Icons.currency_rupee),
+                  prefixIcon:
+                      const Icon(Icons.currency_rupee),
                   suffixText: "per kg",
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius:
+                        BorderRadius.circular(14),
                   ),
                 ),
                 validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
+                  if (value == null ||
+                      value.trim().isEmpty) {
                     return "Please enter your expected price";
                   }
 
-                  if (double.tryParse(value) == null) {
+                  final number =
+                      double.tryParse(value);
+
+                  if (number == null) {
                     return "Enter a valid price";
                   }
 
-                  if (double.parse(value) <= 0) {
+                  if (number <= 0) {
                     return "Price must be greater than 0";
                   }
 
@@ -550,26 +746,32 @@ class _AddCropScreenState extends State<AddCropScreen> {
 
               const SizedBox(height: 18),
 
+              // Location
               TextFormField(
                 controller: _locationController,
                 decoration: InputDecoration(
                   labelText: "Location",
                   hintText: "Example: Bengaluru",
-                  prefixIcon: const Icon(Icons.location_on),
+                  prefixIcon:
+                      const Icon(Icons.location_on),
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius:
+                        BorderRadius.circular(14),
                   ),
                 ),
                 validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
+                  if (value == null ||
+                      value.trim().isEmpty) {
                     return "Please enter the location";
                   }
+
                   return null;
                 },
               ),
 
               const SizedBox(height: 30),
 
+              // Add Listing button
               SizedBox(
                 width: double.infinity,
                 height: 60,
@@ -584,10 +786,12 @@ class _AddCropScreenState extends State<AddCropScreen> {
                     ),
                   ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green.shade700,
+                    backgroundColor:
+                        Colors.green.shade700,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius:
+                          BorderRadius.circular(16),
                     ),
                   ),
                 ),
