@@ -211,7 +211,14 @@ class FarmerDashboard extends StatelessWidget {
               width: double.infinity,
               height: 60,
               child: ElevatedButton.icon(
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const AddCropScreen(),
+                     ),
+                   );
+                 },
                 icon: const Icon(Icons.add),
                 label: const Text(
                   "Add My Crop",
@@ -371,6 +378,218 @@ class _ActionCard extends StatelessWidget {
                 textAlign: TextAlign.center,
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class AddCropScreen extends StatefulWidget {
+  const AddCropScreen({super.key});
+
+  @override
+  State<AddCropScreen> createState() => _AddCropScreenState();
+}
+
+class _AddCropScreenState extends State<AddCropScreen> {
+  final _formKey = GlobalKey<FormState>();
+
+  final TextEditingController _cropController = TextEditingController();
+  final TextEditingController _quantityController = TextEditingController();
+  final TextEditingController _priceController = TextEditingController();
+  final TextEditingController _locationController = TextEditingController();
+
+  @override
+  void dispose() {
+    _cropController.dispose();
+    _quantityController.dispose();
+    _priceController.dispose();
+    _locationController.dispose();
+    super.dispose();
+  }
+
+  void _addListing() {
+    if (_formKey.currentState!.validate()) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Crop listing added successfully!"),
+        ),
+      );
+
+      Future.delayed(const Duration(milliseconds: 800), () {
+        if (mounted) {
+          Navigator.pop(context);
+        }
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text(
+          "Add My Crop",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        backgroundColor: Colors.green.shade700,
+        foregroundColor: Colors.white,
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                "Create a Crop Listing 🌱",
+                style: TextStyle(
+                  fontSize: 25,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+
+              const SizedBox(height: 8),
+
+              Text(
+                "Enter the details of the crop you want to sell.",
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey.shade700,
+                ),
+              ),
+
+              const SizedBox(height: 25),
+
+              TextFormField(
+                controller: _cropController,
+                decoration: InputDecoration(
+                  labelText: "Crop Name",
+                  hintText: "Example: Tomato",
+                  prefixIcon: const Icon(Icons.eco),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return "Please enter the crop name";
+                  }
+                  return null;
+                },
+              ),
+
+              const SizedBox(height: 18),
+
+              TextFormField(
+                controller: _quantityController,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  labelText: "Quantity",
+                  hintText: "Example: 500",
+                  prefixIcon: const Icon(Icons.inventory_2),
+                  suffixText: "kg",
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return "Please enter the quantity";
+                  }
+
+                  if (double.tryParse(value) == null) {
+                    return "Enter a valid number";
+                  }
+
+                  if (double.parse(value) <= 0) {
+                    return "Quantity must be greater than 0";
+                  }
+
+                  return null;
+                },
+              ),
+
+              const SizedBox(height: 18),
+
+              TextFormField(
+                controller: _priceController,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                decoration: InputDecoration(
+                  labelText: "Expected Price",
+                  hintText: "Example: 27",
+                  prefixIcon: const Icon(Icons.currency_rupee),
+                  suffixText: "per kg",
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return "Please enter your expected price";
+                  }
+
+                  if (double.tryParse(value) == null) {
+                    return "Enter a valid price";
+                  }
+
+                  if (double.parse(value) <= 0) {
+                    return "Price must be greater than 0";
+                  }
+
+                  return null;
+                },
+              ),
+
+              const SizedBox(height: 18),
+
+              TextFormField(
+                controller: _locationController,
+                decoration: InputDecoration(
+                  labelText: "Location",
+                  hintText: "Example: Bengaluru",
+                  prefixIcon: const Icon(Icons.location_on),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return "Please enter the location";
+                  }
+                  return null;
+                },
+              ),
+
+              const SizedBox(height: 30),
+
+              SizedBox(
+                width: double.infinity,
+                height: 60,
+                child: ElevatedButton.icon(
+                  onPressed: _addListing,
+                  icon: const Icon(Icons.check),
+                  label: const Text(
+                    "Add Listing",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green.shade700,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
                 ),
               ),
             ],
