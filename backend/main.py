@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from crops import router as crops_router
+from communication import router as communication_router
 
 app = FastAPI(
     title="CropD-Up API",
@@ -9,9 +10,7 @@ app = FastAPI(
 )
 
 
-# ==========================================
 # CORS
-# ==========================================
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -21,15 +20,14 @@ app.add_middleware(
 )
 
 
-# ==========================================
-# CROP ROUTES
-# ==========================================
+# Crop routes
 app.include_router(crops_router)
 
+# Farmer-Buyer communication routes
+app.include_router(communication_router)
 
-# ==========================================
-# HOME ROUTE
-# ==========================================
+
+# Home route
 @app.get("/")
 def home():
     return {
