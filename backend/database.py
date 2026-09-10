@@ -1,3 +1,4 @@
+
 import psycopg2
 
 
@@ -44,13 +45,11 @@ def create_tables():
         )
     """)
 
-    # Add farmer_id to an existing crops table if needed
     cursor.execute("""
         ALTER TABLE crops
         ADD COLUMN IF NOT EXISTS farmer_id INTEGER
     """)
 
-    # Add created_at to an existing crops table if needed
     cursor.execute("""
         ALTER TABLE crops
         ADD COLUMN IF NOT EXISTS created_at TIMESTAMP
@@ -93,6 +92,20 @@ def create_tables():
         )
     """)
 
+    # ==========================================
+    # 6. MARKET PRICES TABLE
+    # ==========================================
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS market_prices (
+            id SERIAL PRIMARY KEY,
+            crop_name VARCHAR(100) NOT NULL,
+            market_name VARCHAR(100) NOT NULL,
+            location VARCHAR(100) NOT NULL,
+            price INTEGER NOT NULL,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+
     conn.commit()
 
     cursor.close()
@@ -103,8 +116,10 @@ def create_tables():
     print("Buyers table is ready!")
     print("Shops table is ready!")
     print("Products table is ready!")
-    print("All Phase 7 tables are ready!")
+    print("Market prices table is ready!")
+    print("All Phase 9 database tables are ready!")
 
 
 if __name__ == "__main__":
     create_tables()
+
