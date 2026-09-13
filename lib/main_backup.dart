@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'shop_finder_screen.dart';
 
 void main() {
   runApp(const CropDUpApp());
@@ -2059,7 +2058,62 @@ class SeedShopsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const ShopFinderScreen();
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Seed Shops'),
+        backgroundColor: Colors.green.shade700,
+        foregroundColor: Colors.white,
+      ),
+      body: ListView(
+        padding: const EdgeInsets.all(18),
+        children: [
+          const Text(
+            'Find Seed Suppliers 🌱',
+            style: TextStyle(
+              fontSize: 25,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 18),
+          ...seedShops.map(
+            (shop) => Card(
+              margin: const EdgeInsets.only(
+                bottom: 12,
+              ),
+              child: ListTile(
+                leading: CircleAvatar(
+                  backgroundColor:
+                      Colors.green.shade100,
+                  child: const Icon(Icons.store),
+                ),
+                title: Text(
+                  shop.name,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                subtitle: Text(
+                  '${shop.category}\n'
+                  '${shop.location}',
+                ),
+                isThreeLine: true,
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.star,
+                      size: 18,
+                    ),
+                    const SizedBox(width: 3),
+                    Text(shop.rating.toString()),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 
