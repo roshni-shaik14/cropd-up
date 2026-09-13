@@ -28,6 +28,30 @@ class Shop {
   }
 }
 
+class ShopProduct {
+  final int id;
+  final String productName;
+  final int price;
+  final bool availability;
+
+  const ShopProduct({
+    required this.id,
+    required this.productName,
+    required this.price,
+    required this.availability,
+  });
+
+  factory ShopProduct.fromJson(Map<String, dynamic> json) {
+    return ShopProduct(
+      id: json['id'] as int,
+      productName:
+          json['product_name'] as String? ?? 'Unknown Product',
+      price: (json['price'] as num?)?.toInt() ?? 0,
+      availability: json['availability'] as bool? ?? false,
+    );
+  }
+}
+
 class ShopService {
   static const String _baseUrl = 'http://127.0.0.1:8000';
 
@@ -70,7 +94,9 @@ class ShopService {
     );
 
     final response = await http.get(
-      Uri.parse('$_baseUrl/shops/search/$encodedLocation'),
+      Uri.parse(
+        '$_baseUrl/shops/search/$encodedLocation',
+      ),
     );
 
     if (response.statusCode != 200) {
@@ -83,12 +109,47 @@ class ShopService {
     final decoded = jsonDecode(response.body);
 
     if (decoded is! List) {
-      throw Exception('Invalid shop search data received.');
+      throw Exception(
+        'Invalid shop search data received.',
+      );
     }
 
     return decoded
         .map(
           (item) => Shop.fromJson(
+            Map<String, dynamic>.from(item),
+          ),
+        )
+        .toList();
+  }
+
+  Future<List<ShopProduct>> getShopProducts(
+    int shopId,
+  ) async {
+    final response = await http.get(
+      Uri.parse(
+        '$_baseUrl/shops/$shopId/products',
+      ),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception(
+        'Unable to load shop products. '
+        'Server returned ${response.statusCode}.',
+      );
+    }
+
+    final decoded = jsonDecode(response.body);
+
+    if (decoded is! List) {
+      throw Exception(
+        'Invalid product data received from server.',
+      );
+    }
+
+    return decoded
+        .map(
+          (item) => ShopProduct.fromJson(
             Map<String, dynamic>.from(item),
           ),
         )

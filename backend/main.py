@@ -6,6 +6,7 @@ from communication import router as communication_router
 from market_prices import router as market_prices_router
 from market_recommendation import router as market_recommendation_router
 from shops import router as shops_router
+from products import router as products_router
 
 
 app = FastAPI(
@@ -35,6 +36,7 @@ app.include_router(communication_router)
 app.include_router(market_prices_router)
 app.include_router(market_recommendation_router)
 app.include_router(shops_router)
+app.include_router(products_router)
 
 
 # ==========================================
