@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'shop_map_screen.dart';
 import 'shop_service.dart';
 
 class ShopFinderScreen extends StatefulWidget {
@@ -56,7 +57,6 @@ class _ShopFinderScreenState extends State<ShopFinderScreen> {
 
       setState(() {
         _allShops = shops;
-        _filteredShops = shops;
         _isLoading = false;
       });
 
@@ -72,23 +72,28 @@ class _ShopFinderScreenState extends State<ShopFinderScreen> {
   }
 
   void _applyFilters() {
-    final searchText = _searchController.text.trim().toLowerCase();
+    final searchText =
+        _searchController.text.trim().toLowerCase();
+
+    final filtered = _allShops.where((shop) {
+      final matchesSearch =
+          searchText.isEmpty ||
+          shop.name.toLowerCase().contains(searchText) ||
+          shop.location.toLowerCase().contains(searchText) ||
+          shop.category.toLowerCase().contains(searchText);
+
+      final matchesCategory =
+          _selectedCategory == 'All' ||
+          shop.category.toLowerCase() ==
+              _selectedCategory.toLowerCase();
+
+      return matchesSearch && matchesCategory;
+    }).toList();
+
+    if (!mounted) return;
 
     setState(() {
-      _filteredShops = _allShops.where((shop) {
-        final matchesSearch =
-            searchText.isEmpty ||
-            shop.name.toLowerCase().contains(searchText) ||
-            shop.location.toLowerCase().contains(searchText) ||
-            shop.category.toLowerCase().contains(searchText);
-
-        final matchesCategory =
-            _selectedCategory == 'All' ||
-            shop.category.toLowerCase() ==
-                _selectedCategory.toLowerCase();
-
-        return matchesSearch && matchesCategory;
-      }).toList();
+      _filteredShops = filtered;
     });
   }
 
@@ -109,6 +114,30 @@ class _ShopFinderScreenState extends State<ShopFinderScreen> {
     String? productError;
     bool isLoadingProducts = true;
 
+    Future<void> loadProducts(
+      void Function(void Function()) setSheetState,
+    ) async {
+      setSheetState(() {
+        isLoadingProducts = true;
+        productError = null;
+      });
+
+      try {
+        final loadedProducts =
+            await _shopService.getShopProducts(shop.id);
+
+        setSheetState(() {
+          products = loadedProducts;
+          isLoadingProducts = false;
+        });
+      } catch (error) {
+        setSheetState(() {
+          productError = error.toString();
+          isLoadingProducts = false;
+        });
+      }
+    }
+
     await showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -116,26 +145,14 @@ class _ShopFinderScreenState extends State<ShopFinderScreen> {
       builder: (sheetContext) {
         return StatefulBuilder(
           builder: (context, setSheetState) {
-            if (isLoadingProducts) {
-              _loadProductsForSheet(
-                shop.id,
-                (loadedProducts) {
-                  if (!context.mounted) return;
-
-                  setSheetState(() {
-                    products = loadedProducts;
-                    isLoadingProducts = false;
-                  });
-                },
-                (error) {
-                  if (!context.mounted) return;
-
-                  setSheetState(() {
-                    productError = error;
-                    isLoadingProducts = false;
-                  });
-                },
-              );
+            if (products == null &&
+                productError == null &&
+                isLoadingProducts) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (context.mounted && isLoadingProducts) {
+                  loadProducts(setSheetState);
+                }
+              });
             }
 
             return Container(
@@ -173,6 +190,7 @@ class _ShopFinderScreenState extends State<ShopFinderScreen> {
                           ),
                         ),
                       ),
+
                       const SizedBox(height: 20),
 
                       Row(
@@ -257,7 +275,8 @@ class _ShopFinderScreenState extends State<ShopFinderScreen> {
                         const Center(
                           child: Padding(
                             padding: EdgeInsets.all(30),
-                            child: CircularProgressIndicator(),
+                            child:
+                                CircularProgressIndicator(),
                           ),
                         )
                       else if (productError != null)
@@ -291,15 +310,15 @@ class _ShopFinderScreenState extends State<ShopFinderScreen> {
                               const SizedBox(height: 12),
                               OutlinedButton.icon(
                                 onPressed: () {
-                                  setSheetState(() {
-                                    isLoadingProducts = true;
-                                    productError = null;
-                                  });
+                                  loadProducts(
+                                    setSheetState,
+                                  );
                                 },
                                 icon: const Icon(
                                   Icons.refresh,
                                 ),
-                                label: const Text('Retry'),
+                                label:
+                                    const Text('Retry'),
                               ),
                             ],
                           ),
@@ -331,10 +350,7 @@ class _ShopFinderScreenState extends State<ShopFinderScreen> {
                           ),
                         )
                       else
-                        ...products!.map(
-                          (product) =>
-                              _productCard(product),
-                        ),
+                        ...products!.map(_productCard),
 
                       const SizedBox(height: 20),
 
@@ -356,9 +372,7 @@ class _ShopFinderScreenState extends State<ShopFinderScreen> {
                               ),
                             );
                           },
-                          icon: const Icon(
-                            Icons.phone,
-                          ),
+                          icon: const Icon(Icons.phone),
                           label: const Text(
                             'Contact Shop',
                             style: TextStyle(
@@ -377,21 +391,6 @@ class _ShopFinderScreenState extends State<ShopFinderScreen> {
         );
       },
     );
-  }
-
-  Future<void> _loadProductsForSheet(
-    int shopId,
-    void Function(List<ShopProduct>) onSuccess,
-    void Function(String) onError,
-  ) async {
-    try {
-      final products =
-          await _shopService.getShopProducts(shopId);
-
-      onSuccess(products);
-    } catch (error) {
-      onError(error.toString());
-    }
   }
 
   Widget _infoRow(
@@ -526,17 +525,35 @@ class _ShopFinderScreenState extends State<ShopFinderScreen> {
           controller: _searchController,
           onChanged: _onSearchChanged,
           decoration: InputDecoration(
-            hintText: 'Search shop, location or category',
+            hintText:
+                'Search shop, location or category',
             prefixIcon: const Icon(Icons.search),
-            suffixIcon: _searchController.text.isNotEmpty
-                ? IconButton(
-                    onPressed: () {
-                      _searchController.clear();
-                      _applyFilters();
-                    },
-                    icon: const Icon(Icons.clear),
-                  )
-                : null,
+            suffixIcon:
+                _searchController.text.isNotEmpty
+                    ? IconButton(
+                        onPressed: () {
+                          _searchController.clear();
+                          _applyFilters();
+                        },
+                        icon: const Icon(Icons.clear),
+                      )
+                    : null,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide(
+                color: Colors.grey.shade300,
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide(
+                color: Colors.green.shade700,
+                width: 2,
+              ),
+            ),
           ),
         ),
 
@@ -560,7 +577,8 @@ class _ShopFinderScreenState extends State<ShopFinderScreen> {
                 onSelected: (_) {
                   _selectCategory(category);
                 },
-                selectedColor: Colors.green.shade100,
+                selectedColor:
+                    Colors.green.shade100,
                 labelStyle: TextStyle(
                   color: selected
                       ? Colors.green.shade800
@@ -593,7 +611,8 @@ class _ShopFinderScreenState extends State<ShopFinderScreen> {
             children: [
               CircleAvatar(
                 radius: 28,
-                backgroundColor: Colors.green.shade100,
+                backgroundColor:
+                    Colors.green.shade100,
                 child: Icon(
                   Icons.storefront_outlined,
                   color: Colors.green.shade700,
@@ -753,6 +772,46 @@ class _ShopFinderScreenState extends State<ShopFinderScreen> {
 
           _buildSearchAndFilters(),
 
+          const SizedBox(height: 16),
+
+          SizedBox(
+            width: double.infinity,
+            height: 52,
+            child: OutlinedButton.icon(
+              onPressed: _allShops.isEmpty
+                  ? null
+                  : () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => ShopMapScreen(
+                            shops: _allShops,
+                          ),
+                        ),
+                      );
+                    },
+              icon: const Icon(Icons.map_outlined),
+              label: const Text(
+                'View Shops on Map',
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              style: OutlinedButton.styleFrom(
+                foregroundColor:
+                    Colors.green.shade700,
+                side: BorderSide(
+                  color: Colors.green.shade700,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius:
+                      BorderRadius.circular(16),
+                ),
+              ),
+            ),
+          ),
+
           const SizedBox(height: 20),
 
           if (_filteredShops.isEmpty)
@@ -760,7 +819,8 @@ class _ShopFinderScreenState extends State<ShopFinderScreen> {
               padding: const EdgeInsets.all(30),
               decoration: BoxDecoration(
                 color: Colors.grey.shade100,
-                borderRadius: BorderRadius.circular(18),
+                borderRadius:
+                    BorderRadius.circular(18),
               ),
               child: const Column(
                 children: [
@@ -808,6 +868,24 @@ class _ShopFinderScreenState extends State<ShopFinderScreen> {
             onPressed: _loadShops,
             tooltip: 'Refresh',
             icon: const Icon(Icons.refresh),
+          ),
+          IconButton(
+            onPressed: _allShops.isEmpty
+                ? null
+                : () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => ShopMapScreen(
+                          shops: _allShops,
+                        ),
+                      ),
+                    );
+                  },
+            tooltip: 'View map',
+            icon: const Icon(
+              Icons.map_outlined,
+            ),
           ),
         ],
       ),
