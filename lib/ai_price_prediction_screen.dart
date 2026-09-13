@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'ai_price_service.dart';
+import 'recommendation_service.dart';
 
 class AiPricePredictionScreen extends StatefulWidget {
   const AiPricePredictionScreen({super.key});
@@ -21,6 +22,7 @@ class _AiPricePredictionScreenState
       TextEditingController();
 
   AiPricePrediction? prediction;
+  RecommendationResult? recommendation;
 
   bool loading = false;
   String? errorMessage;
@@ -37,22 +39,41 @@ class _AiPricePredictionScreenState
       loading = true;
       errorMessage = null;
       prediction = null;
+      recommendation = null;
     });
 
     try {
+      final cropName = cropController.text.trim();
+      final location = locationController.text.trim();
+
       final quantity =
           double.tryParse(quantityController.text.trim()) ?? 0;
 
-      final result = await AiPriceService.predictPrice(
-        cropName: cropController.text.trim(),
-        location: locationController.text.trim(),
+      // ------------------------------------------
+      // 1. Get AI price prediction
+      // ------------------------------------------
+      final priceResult =
+          await AiPriceService.predictPrice(
+        cropName: cropName,
+        location: location,
+        quantity: quantity,
+      );
+
+      // ------------------------------------------
+      // 2. Get best market recommendation
+      // ------------------------------------------
+      final recommendationResult =
+          await RecommendationService.getRecommendation(
+        cropName: cropName,
+        location: location,
         quantity: quantity,
       );
 
       if (!mounted) return;
 
       setState(() {
-        prediction = result;
+        prediction = priceResult;
+        recommendation = recommendationResult;
         loading = false;
       });
     } catch (e) {
@@ -61,7 +82,8 @@ class _AiPricePredictionScreenState
       setState(() {
         loading = false;
         errorMessage =
-            'Unable to get AI prediction. Please check that the backend is running.';
+            'Unable to get AI recommendation. '
+            'Please check that the backend is running.';
       });
     }
   }
@@ -105,7 +127,8 @@ class _AiPricePredictionScreenState
             const SizedBox(height: 8),
 
             const Text(
-              'AI analyzes available market prices and suggests a competitive selling price for your crop.',
+              'AI analyzes market prices and recommends '
+              'the best selling opportunity for your crop.',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 15,
@@ -119,10 +142,12 @@ class _AiPricePredictionScreenState
               controller: cropController,
               decoration: InputDecoration(
                 labelText: 'Crop Name',
-                hintText: 'Example: Tomato',
-                prefixIcon: const Icon(Icons.agriculture),
+                hintText: 'Example: Potato',
+                prefixIcon:
+                    const Icon(Icons.agriculture),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius:
+                      BorderRadius.circular(12),
                 ),
               ),
             ),
@@ -134,9 +159,11 @@ class _AiPricePredictionScreenState
               decoration: InputDecoration(
                 labelText: 'Location',
                 hintText: 'Example: Bengaluru',
-                prefixIcon: const Icon(Icons.location_on),
+                prefixIcon:
+                    const Icon(Icons.location_on),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius:
+                      BorderRadius.circular(12),
                 ),
               ),
             ),
@@ -145,15 +172,18 @@ class _AiPricePredictionScreenState
 
             TextField(
               controller: quantityController,
-              keyboardType: const TextInputType.numberWithOptions(
+              keyboardType:
+                  const TextInputType.numberWithOptions(
                 decimal: true,
               ),
               decoration: InputDecoration(
                 labelText: 'Quantity (kg)',
-                hintText: 'Example: 100',
-                prefixIcon: const Icon(Icons.scale),
+                hintText: 'Example: 500',
+                prefixIcon:
+                    const Icon(Icons.scale),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius:
+                      BorderRadius.circular(12),
                 ),
               ),
             ),
@@ -161,26 +191,33 @@ class _AiPricePredictionScreenState
             const SizedBox(height: 24),
 
             ElevatedButton.icon(
-              onPressed: loading ? null : predictPrice,
+              onPressed:
+                  loading ? null : predictPrice,
               icon: loading
                   ? const SizedBox(
                       width: 20,
                       height: 20,
-                      child: CircularProgressIndicator(
+                      child:
+                          CircularProgressIndicator(
                         strokeWidth: 2,
                       ),
                     )
-                  : const Icon(Icons.auto_awesome),
+                  : const Icon(
+                      Icons.auto_awesome,
+                    ),
               label: Text(
                 loading
                     ? 'Analyzing Markets...'
-                    : 'Predict Best Price',
+                    : 'Find Best Selling Opportunity',
               ),
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(
+              style:
+                  ElevatedButton.styleFrom(
+                padding:
+                    const EdgeInsets.symmetric(
                   vertical: 16,
                 ),
-                textStyle: const TextStyle(
+                textStyle:
+                    const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
@@ -191,10 +228,12 @@ class _AiPricePredictionScreenState
               const SizedBox(height: 20),
               Card(
                 child: Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding:
+                      const EdgeInsets.all(16),
                   child: Text(
                     errorMessage!,
-                    style: const TextStyle(
+                    style:
+                        const TextStyle(
                       fontSize: 15,
                     ),
                   ),
@@ -207,7 +246,7 @@ class _AiPricePredictionScreenState
               const SizedBox(height: 28),
 
               const Text(
-                'AI Prediction Result',
+                'AI Price Analysis',
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
@@ -249,23 +288,35 @@ class _AiPricePredictionScreenState
               const SizedBox(height: 20),
 
               Card(
+                elevation: 3,
                 child: Padding(
-                  padding: const EdgeInsets.all(18),
+                  padding:
+                      const EdgeInsets.all(18),
                   child: Column(
                     crossAxisAlignment:
                         CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'AI Recommendation',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
+                      const Row(
+                        children: [
+                          Icon(
+                            Icons.auto_awesome,
+                          ),
+                          SizedBox(width: 8),
+                          Text(
+                            'AI Recommendation',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight:
+                                  FontWeight.bold,
+                            ),
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 10),
                       Text(
                         prediction!.recommendation,
-                        style: const TextStyle(
+                        style:
+                            const TextStyle(
                           fontSize: 15,
                         ),
                       ),
@@ -277,9 +328,159 @@ class _AiPricePredictionScreenState
               const SizedBox(height: 12),
 
               Text(
-                'Markets analyzed: ${prediction!.marketsAnalyzed}',
+                'Markets analyzed: '
+                '${prediction!.marketsAnalyzed}',
                 textAlign: TextAlign.center,
-                style: const TextStyle(
+                style:
+                    const TextStyle(
+                  color: Colors.grey,
+                ),
+              ),
+            ],
+
+            // ------------------------------------------
+            // BEST MARKET RECOMMENDATION
+            // ------------------------------------------
+            if (recommendation != null &&
+                recommendation!.success) ...[
+              const SizedBox(height: 30),
+
+              const Text(
+                'Best Market Recommendation',
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+
+              const SizedBox(height: 16),
+
+              Card(
+                elevation: 4,
+                child: Padding(
+                  padding:
+                      const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment:
+                        CrossAxisAlignment.start,
+                    children: [
+                      const Row(
+                        children: [
+                          Icon(
+                            Icons.store,
+                            size: 32,
+                          ),
+                          SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              'Recommended Market',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 8),
+
+                      Text(
+                        recommendation!
+                            .recommendedMarket,
+                        style: const TextStyle(
+                          fontSize: 25,
+                          fontWeight:
+                              FontWeight.bold,
+                        ),
+                      ),
+
+                      const SizedBox(height: 6),
+
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.location_on,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            recommendation!
+                                .marketLocation,
+                            style:
+                                const TextStyle(
+                              fontSize: 15,
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 18),
+
+                      const Divider(),
+
+                      const SizedBox(height: 12),
+
+                      _recommendationRow(
+                        'Market Price',
+                        '₹${recommendation!.marketPrice.toStringAsFixed(2)} / kg',
+                      ),
+
+                      const SizedBox(height: 10),
+
+                      _recommendationRow(
+                        'Your Quantity',
+                        '${recommendation!.quantity.toStringAsFixed(0)} kg',
+                      ),
+
+                      const SizedBox(height: 10),
+
+                      _recommendationRow(
+                        'Expected Revenue',
+                        '₹${recommendation!.estimatedRevenue.toStringAsFixed(2)}',
+                      ),
+
+                      const SizedBox(height: 18),
+
+                      Container(
+                        width: double.infinity,
+                        padding:
+                            const EdgeInsets.all(14),
+                        decoration:
+                            BoxDecoration(
+                          borderRadius:
+                              BorderRadius.circular(
+                            12,
+                          ),
+                          color: Theme.of(context)
+                              .colorScheme
+                              .surfaceContainerHighest,
+                        ),
+                        child: Text(
+                          recommendation!
+                              .recommendation,
+                          style:
+                              const TextStyle(
+                            fontSize: 15,
+                            fontWeight:
+                                FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 12),
+
+              Text(
+                'Recommendation based on '
+                '${recommendation!.marketsAnalyzed} '
+                'available markets.',
+                textAlign: TextAlign.center,
+                style:
+                    const TextStyle(
                   color: Colors.grey,
                 ),
               ),
@@ -298,7 +499,8 @@ class _AiPricePredictionScreenState
     return Card(
       elevation: 2,
       child: Padding(
-        padding: const EdgeInsets.all(18),
+        padding:
+            const EdgeInsets.all(18),
         child: Row(
           children: [
             Icon(
@@ -313,7 +515,8 @@ class _AiPricePredictionScreenState
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(
+                    style:
+                        const TextStyle(
                       fontSize: 14,
                       color: Colors.grey,
                     ),
@@ -321,9 +524,11 @@ class _AiPricePredictionScreenState
                   const SizedBox(height: 5),
                   Text(
                     price,
-                    style: const TextStyle(
+                    style:
+                        const TextStyle(
                       fontSize: 20,
-                      fontWeight: FontWeight.bold,
+                      fontWeight:
+                          FontWeight.bold,
                     ),
                   ),
                 ],
@@ -332,6 +537,32 @@ class _AiPricePredictionScreenState
           ],
         ),
       ),
+    );
+  }
+
+  Widget _recommendationRow(
+    String title,
+    String value,
+  ) {
+    return Row(
+      mainAxisAlignment:
+          MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(
+            fontSize: 15,
+            color: Colors.grey,
+          ),
+        ),
+        Text(
+          value,
+          style: const TextStyle(
+            fontSize: 17,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
     );
   }
 }

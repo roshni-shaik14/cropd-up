@@ -8,6 +8,7 @@ from market_recommendation import router as market_recommendation_router
 from shops import router as shops_router
 from products import router as products_router
 from ai_price_prediction import router as ai_price_prediction_router
+from recommendation_engine import router as recommendation_engine_router
 
 
 app = FastAPI(
@@ -39,6 +40,7 @@ app.include_router(market_recommendation_router)
 app.include_router(shops_router)
 app.include_router(products_router)
 app.include_router(ai_price_prediction_router)
+app.include_router(recommendation_engine_router)
 
 
 # ==========================================
