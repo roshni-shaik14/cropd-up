@@ -54,21 +54,6 @@ class AppLanguageController extends ChangeNotifier {
 final appLanguageController = AppLanguageController();
 
 class AppText {
-  static String welcome(AppLanguage language) {
-    switch (language) {
-      case AppLanguage.english:
-        return 'Welcome';
-      case AppLanguage.kannada:
-        return 'ಸ್ವಾಗತ';
-      case AppLanguage.hindi:
-        return 'स्वागत है';
-      case AppLanguage.telugu:
-        return 'స్వాగతం';
-      case AppLanguage.tamil:
-        return 'வரவேற்கிறோம்';
-    }
-  }
-
   static String betterPrices(AppLanguage language) {
     switch (language) {
       case AppLanguage.english:
@@ -189,142 +174,158 @@ class AppText {
     }
   }
 
-  // ---------------- FARMER ----------------
+  // General translation helper.
+  static String get(String key) {
+    final language = appLanguageController.language;
 
-  static String farmerDashboard(AppLanguage language) {
+    final translations = <String, List<String>>{
+      'Welcome': [
+        'Welcome',
+        'ಸ್ವಾಗತ',
+        'स्वागत',
+        'స్వాగతం',
+        'வரவேற்பு',
+      ],
+      'Farmer Dashboard': [
+        'Farmer Dashboard',
+        'ರೈತ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್',
+        'किसान डैशबोर्ड',
+        'రైతు డ్యాష్‌బోర్డ్',
+        'விவசாயி டாஷ்போர்டு',
+      ],
+      'Buyer Dashboard': [
+        'Buyer Dashboard',
+        'ಖರೀದಿದಾರ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್',
+        'खरीदार डैशबोर्ड',
+        'కొనుగోలుదారు డ్యాష్‌బోర్డ్',
+        'வாங்குபவர் டாஷ்போர்டு',
+      ],
+      'Home': [
+        'Home',
+        'ಮುಖಪುಟ',
+        'होम',
+        'హోమ్',
+        'முகப்பு',
+      ],
+      'Crops': [
+        'Crops',
+        'ಬೆಳೆಗಳು',
+        'फसलें',
+        'పంటలు',
+        'பயிர்கள்',
+      ],
+      'Market': [
+        'Market',
+        'ಮಾರುಕಟ್ಟೆ',
+        'बाज़ार',
+        'మార్కెట్',
+        'சந்தை',
+      ],
+      'Profile': [
+        'Profile',
+        'ಪ್ರೊಫೈಲ್',
+        'प्रोफ़ाइल',
+        'ప్రొఫైల్',
+        'சுயவிவரம்',
+      ],
+      'Notifications': [
+        'Notifications',
+        'ಅಧಿಸೂಚನೆಗಳು',
+        'सूचनाएं',
+        'నోటిఫికేషన్లు',
+        'அறிவிப்புகள்',
+      ],
+      'Language': [
+        'Language',
+        'ಭಾಷೆ',
+        'भाषा',
+        'భాష',
+        'மொழி',
+      ],
+      'Account Details': [
+        'Account Details',
+        'ಖಾತೆ ವಿವರಗಳು',
+        'खाता विवरण',
+        'ఖాతా వివరాలు',
+        'கணக்கு விவரங்கள்',
+      ],
+      'Help & Support': [
+        'Help & Support',
+        'ಸಹಾಯ ಮತ್ತು ಬೆಂಬಲ',
+        'सहायता और समर्थन',
+        'సహాయం & మద్దతు',
+        'உதவி & ஆதரவு',
+      ],
+      'About Crop\'D UP': [
+        "About Crop'D UP",
+        "Crop'D UP ಬಗ್ಗೆ",
+        "Crop'D UP के बारे में",
+        "Crop'D UP గురించి",
+        "Crop'D UP பற்றி",
+      ],
+      'Connecting farmers and buyers.': [
+        'Connecting farmers and buyers.',
+        'ರೈತರು ಮತ್ತು ಖರೀದಿದಾರರನ್ನು ಸಂಪರ್ಕಿಸಲಾಗುತ್ತಿದೆ.',
+        'किसानों और खरीदारों को जोड़ना।',
+        'రైతులు మరియు కొనుగోలుదారులను కలుపుతోంది.',
+        'விவசாயிகள் மற்றும் வாங்குபவர்களை இணைக்கிறது.',
+      ],
+      'MVP': [
+        'MVP',
+        'MVP',
+        'MVP',
+        'MVP',
+        'MVP',
+      ],
+      'My Requests': [
+        'My Requests',
+        'ನನ್ನ ವಿನಂತಿಗಳು',
+        'मेरे अनुरोध',
+        'నా అభ్యర్థనలు',
+        'எனது கோரிக்கைகள்',
+      ],
+      'No requests yet': [
+        'No requests yet',
+        'ಇನ್ನೂ ಯಾವುದೇ ವಿನಂತಿಗಳಿಲ್ಲ',
+        'अभी तक कोई अनुरोध नहीं',
+        'ఇంకా అభ్యర్థనలు లేవు',
+        'இன்னும் கோரிக்கைகள் இல்லை',
+      ],
+    };
+
+    final values = translations[key];
+
+    if (values == null) {
+      return key;
+    }
+
     switch (language) {
       case AppLanguage.english:
-        return 'Farmer Dashboard';
+        return values[0];
       case AppLanguage.kannada:
-        return 'ರೈತ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್';
+        return values[1];
       case AppLanguage.hindi:
-        return 'किसान डैशबोर्ड';
+        return values[2];
       case AppLanguage.telugu:
-        return 'రైతు డ్యాష్‌బోర్డ్';
+        return values[3];
       case AppLanguage.tamil:
-        return 'விவசாயி டாஷ்போர்டு';
+        return values[4];
     }
   }
 
-  static String addCrop(AppLanguage language) {
+  // Backward-compatible Welcome helper.
+  static String welcome(AppLanguage language) {
     switch (language) {
       case AppLanguage.english:
-        return 'Add Crop';
+        return 'Welcome';
       case AppLanguage.kannada:
-        return 'ಬೆಳೆ ಸೇರಿಸಿ';
+        return 'ಸ್ವಾಗತ';
       case AppLanguage.hindi:
-        return 'फसल जोड़ें';
+        return 'स्वागत है';
       case AppLanguage.telugu:
-        return 'పంటను జోడించండి';
+        return 'స్వాగతం';
       case AppLanguage.tamil:
-        return 'பயிரைச் சேர்க்கவும்';
-    }
-  }
-
-  static String myCrops(AppLanguage language) {
-    switch (language) {
-      case AppLanguage.english:
-        return 'My Crops';
-      case AppLanguage.kannada:
-        return 'ನನ್ನ ಬೆಳೆಗಳು';
-      case AppLanguage.hindi:
-        return 'मेरी फसलें';
-      case AppLanguage.telugu:
-        return 'నా పంటలు';
-      case AppLanguage.tamil:
-        return 'எனது பயிர்கள்';
-    }
-  }
-
-  static String marketPrices(AppLanguage language) {
-    switch (language) {
-      case AppLanguage.english:
-        return 'Market Prices';
-      case AppLanguage.kannada:
-        return 'ಮಾರುಕಟ್ಟೆ ಬೆಲೆಗಳು';
-      case AppLanguage.hindi:
-        return 'बाज़ार की कीमतें';
-      case AppLanguage.telugu:
-        return 'మార్కెట్ ధరలు';
-      case AppLanguage.tamil:
-        return 'சந்தை விலைகள்';
-    }
-  }
-
-  static String findShops(AppLanguage language) {
-    switch (language) {
-      case AppLanguage.english:
-        return 'Find Shops';
-      case AppLanguage.kannada:
-        return 'ಅಂಗಡಿಗಳನ್ನು ಹುಡುಕಿ';
-      case AppLanguage.hindi:
-        return 'दुकानें खोजें';
-      case AppLanguage.telugu:
-        return 'దుకాణాలను కనుగొనండి';
-      case AppLanguage.tamil:
-        return 'கடைகளைக் கண்டறியவும்';
-    }
-  }
-
-  // ---------------- BUYER ----------------
-
-  static String buyerDashboard(AppLanguage language) {
-    switch (language) {
-      case AppLanguage.english:
-        return 'Buyer Dashboard';
-      case AppLanguage.kannada:
-        return 'ಖರೀದಿದಾರ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್';
-      case AppLanguage.hindi:
-        return 'खरीदार डैशबोर्ड';
-      case AppLanguage.telugu:
-        return 'కొనుగోలుదారు డ్యాష్‌బోర్డ్';
-      case AppLanguage.tamil:
-        return 'வாங்குபவர் டாஷ்போர்டு';
-    }
-  }
-
-  static String findCrops(AppLanguage language) {
-    switch (language) {
-      case AppLanguage.english:
-        return 'Find Crops';
-      case AppLanguage.kannada:
-        return 'ಬೆಳೆಗಳನ್ನು ಹುಡುಕಿ';
-      case AppLanguage.hindi:
-        return 'फसलें खोजें';
-      case AppLanguage.telugu:
-        return 'పంటలను కనుగొనండి';
-      case AppLanguage.tamil:
-        return 'பயிர்களைக் கண்டறியவும்';
-    }
-  }
-
-  static String contactFarmer(AppLanguage language) {
-    switch (language) {
-      case AppLanguage.english:
-        return 'Contact Farmer';
-      case AppLanguage.kannada:
-        return 'ರೈತರನ್ನು ಸಂಪರ್ಕಿಸಿ';
-      case AppLanguage.hindi:
-        return 'किसान से संपर्क करें';
-      case AppLanguage.telugu:
-        return 'రైతును సంప్రదించండి';
-      case AppLanguage.tamil:
-        return 'விவசாயியைத் தொடர்புகொள்ளவும்';
-    }
-  }
-
-  static String directFromFarmers(AppLanguage language) {
-    switch (language) {
-      case AppLanguage.english:
-        return 'Directly from farmers';
-      case AppLanguage.kannada:
-        return 'ನೇರವಾಗಿ ರೈತರಿಂದ';
-      case AppLanguage.hindi:
-        return 'सीधे किसानों से';
-      case AppLanguage.telugu:
-        return 'నేరుగా రైతుల నుండి';
-      case AppLanguage.tamil:
-        return 'நேரடியாக விவசாயிகளிடமிருந்து';
+        return 'வரவேற்கிறோம்';
     }
   }
 }
