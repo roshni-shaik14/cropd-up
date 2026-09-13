@@ -7,7 +7,7 @@ def get_connection():
         host="localhost",
         database="cropdup",
         user="postgres",
-        password="navyacharya2523",
+        password="Roshhh04",
         port="5432"
     )
 
