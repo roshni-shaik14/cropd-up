@@ -11,6 +11,9 @@ from ai_price_prediction import router as ai_price_prediction_router
 from recommendation_engine import router as recommendation_engine_router
 
 
+# ==========================================
+# CREATE FASTAPI APP
+# ==========================================
 app = FastAPI(
     title="CropD-Up API",
     description="Farmer-First Marketplace Backend",
@@ -24,11 +27,12 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-    "http://localhost:8000",
-    "http://127.0.0.1:8000",
-    "http://localhost:5000",
-    "http://127.0.0.1:5000",
-],
+        "http://localhost:8000",
+        "http://127.0.0.1:8000",
+        "http://localhost:5000",
+        "http://127.0.0.1:5000",
+    ],
+    allow_origin_regex=r"https?://(localhost|127\.0\.0\.1)(:\d+)?$",
     allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -56,5 +60,5 @@ def home():
     return {
         "message": "CropD-Up Backend is running",
         "version": "1.2.0",
-        "phase": "Phase 15 - AI Price Prediction"
+        "phase": "Phase 17 - Security & Trust"
     }

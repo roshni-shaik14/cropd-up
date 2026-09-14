@@ -572,10 +572,10 @@ class _FarmerShellState extends State<FarmerShell> {
   @override
   Widget build(BuildContext context) {
     final titles = [
-      AppText.get('farmerDashboard'),
-      AppText.get('marketPrices'),
-      AppText.get('myCrops'),
-      AppText.get('profile'),
+      AppText.get('Farmer Dashboard'),
+      AppText.get('Market Prices'),
+      AppText.get('My Crops'),
+      AppText.get('Profile'),
     ];
 
     final pages = [
@@ -621,7 +621,7 @@ class _FarmerShellState extends State<FarmerShell> {
               foregroundColor: Colors.white,
               icon: const Icon(Icons.add),
               label: Text(
-                AppText.get('addCrop'),
+                AppText.get('Add Crop'),
               ),
             )
           : null,
@@ -658,7 +658,7 @@ class _FarmerShellState extends State<FarmerShell> {
             selectedIcon: const Icon(
               Icons.eco,
             ),
-            label: AppText.get('myCrops'),
+            label: AppText.get('My Crops'),
           ),
           NavigationDestination(
             icon: const Icon(
@@ -698,7 +698,7 @@ class FarmerHome extends StatelessWidget {
         children: [
           _GreetingCard(
             name: 'Farmer',
-            subtitle: AppText.get('manageCropsPrices'),
+            subtitle: AppText.get('Manage Crops Prices'),
             icon: '👨‍🌾',
           ),
           const SizedBox(height: 18),
@@ -727,7 +727,7 @@ class FarmerHome extends StatelessWidget {
           const SizedBox(height: 22),
 
           Text(
-            AppText.get('myCropListings'),
+            AppText.get('My Crop Listings'),
             style: const TextStyle(
               fontSize: 21,
               fontWeight: FontWeight.bold,
@@ -753,7 +753,7 @@ class FarmerHome extends StatelessWidget {
           const SizedBox(height: 20),
 
           Text(
-            AppText.get('smartTools'),
+            AppText.get('Smart Tools'),
             style: const TextStyle(
               fontSize: 21,
               fontWeight: FontWeight.bold,
@@ -765,10 +765,10 @@ class FarmerHome extends StatelessWidget {
           _ToolTile(
             icon: Icons.auto_awesome,
             title: AppText.get(
-              'aiPriceRecommendation',
+              'Ai Price Recommendation',
             ),
             subtitle: AppText.get(
-              'suggestedSellingPrice',
+              'Suggested Selling Price',
             ),
             onTap: () {
               Navigator.push(
@@ -783,9 +783,9 @@ class FarmerHome extends StatelessWidget {
 
           _ToolTile(
             icon: Icons.storefront_outlined,
-            title: AppText.get('seedShops'),
+            title: AppText.get('Seed Shops'),
             subtitle: AppText.get(
-              'nearbySeedSuppliers',
+              'Nearby SeedSuppliers',
             ),
             onTap: () {
               Navigator.push(
@@ -800,9 +800,9 @@ class FarmerHome extends StatelessWidget {
 
           _ToolTile(
             icon: Icons.notifications_none,
-            title: AppText.get('notifications'),
+            title: AppText.get('Notifications'),
             subtitle: AppText.get(
-              'updatesBuyerRequests',
+              'Updates on Buyer Requests',
             ),
             onTap: () {
               Navigator.push(
