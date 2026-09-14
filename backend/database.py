@@ -1,14 +1,20 @@
+import os
 
 import psycopg2
+from dotenv import load_dotenv
+
+
+# Load environment variables from the .env file
+load_dotenv()
 
 
 def get_connection():
     return psycopg2.connect(
-        host="localhost",
-        database="cropdup",
-        user="postgres",
-        password="Roshhh04",
-        port="5432"
+        host=os.getenv("DB_HOST", "localhost"),
+        database=os.getenv("DB_NAME", "cropdup"),
+        user=os.getenv("DB_USER", "postgres"),
+        password=os.getenv("DB_PASSWORD"),
+        port=os.getenv("DB_PORT", "5432"),
     )
 
 
@@ -122,4 +128,3 @@ def create_tables():
 
 if __name__ == "__main__":
     create_tables()
-
