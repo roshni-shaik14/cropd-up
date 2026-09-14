@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from database import get_connection
 
 router = APIRouter()
@@ -9,37 +9,51 @@ router = APIRouter()
 # ==========================================
 @router.get("/market-prices")
 def get_market_prices():
-    conn = get_connection()
-    cursor = conn.cursor()
+    conn = None
+    cursor = None
 
-    cursor.execute("""
-        SELECT
-            id,
-            crop_name,
-            market_name,
-            location,
-            price,
-            updated_at
-        FROM market_prices
-        ORDER BY id
-    """)
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
 
-    rows = cursor.fetchall()
+        cursor.execute("""
+            SELECT
+                id,
+                crop_name,
+                market_name,
+                location,
+                price,
+                updated_at
+            FROM market_prices
+            ORDER BY id
+        """)
 
-    cursor.close()
-    conn.close()
+        rows = cursor.fetchall()
 
-    return [
-        {
-            "id": row[0],
-            "crop_name": row[1],
-            "market_name": row[2],
-            "location": row[3],
-            "price": row[4],
-            "updated_at": row[5]
-        }
-        for row in rows
-    ]
+        return [
+            {
+                "id": row[0],
+                "crop_name": row[1],
+                "market_name": row[2],
+                "location": row[3],
+                "price": row[4],
+                "updated_at": row[5]
+            }
+            for row in rows
+        ]
+
+    except Exception:
+        raise HTTPException(
+            status_code=500,
+            detail="Unable to retrieve market price information"
+        )
+
+    finally:
+        if cursor is not None:
+            cursor.close()
+
+        if conn is not None:
+            conn.close()
 
 
 # ==========================================
@@ -47,35 +61,63 @@ def get_market_prices():
 # ==========================================
 @router.get("/market-prices/{crop_name}")
 def get_crop_market_prices(crop_name: str):
-    conn = get_connection()
-    cursor = conn.cursor()
+    crop_name = crop_name.strip()
 
-    cursor.execute("""
-        SELECT
-            id,
-            crop_name,
-            market_name,
-            location,
-            price,
-            updated_at
-        FROM market_prices
-        WHERE LOWER(crop_name) = LOWER(%s)
-        ORDER BY price DESC
-    """, (crop_name,))
+    if not crop_name:
+        raise HTTPException(
+            status_code=400,
+            detail="Crop name cannot be empty"
+        )
 
-    rows = cursor.fetchall()
+    if len(crop_name) > 100:
+        raise HTTPException(
+            status_code=400,
+            detail="Crop name is too long"
+        )
 
-    cursor.close()
-    conn.close()
+    conn = None
+    cursor = None
 
-    return [
-        {
-            "id": row[0],
-            "crop_name": row[1],
-            "market_name": row[2],
-            "location": row[3],
-            "price": row[4],
-            "updated_at": row[5]
-        }
-        for row in rows
-    ]
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            SELECT
+                id,
+                crop_name,
+                market_name,
+                location,
+                price,
+                updated_at
+            FROM market_prices
+            WHERE LOWER(crop_name) = LOWER(%s)
+            ORDER BY price DESC
+        """, (crop_name,))
+
+        rows = cursor.fetchall()
+
+        return [
+            {
+                "id": row[0],
+                "crop_name": row[1],
+                "market_name": row[2],
+                "location": row[3],
+                "price": row[4],
+                "updated_at": row[5]
+            }
+            for row in rows
+        ]
+
+    except Exception:
+        raise HTTPException(
+            status_code=500,
+            detail="Unable to retrieve market price information"
+        )
+
+    finally:
+        if cursor is not None:
+            cursor.close()
+
+        if conn is not None:
+            conn.close()
