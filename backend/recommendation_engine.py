@@ -1,35 +1,59 @@
 from fastapi import APIRouter
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from database import get_connection
 
 router = APIRouter()
 
 
 class RecommendationRequest(BaseModel):
-    crop_name: str
-    location: str = ""
-    quantity: float = 0
+    crop_name: str = Field(
+        ...,
+        min_length=1,
+        max_length=100
+    )
+
+    location: str = Field(
+        default="",
+        max_length=100
+    )
+
+    quantity: float = Field(
+        default=0,
+        gt=0,
+        le=100000
+    )
 
 
 @router.post("/recommendation-engine")
 def recommendation_engine(request: RecommendationRequest):
+    crop_name = request.crop_name.strip()
+    location = request.location.strip()
+
+    if not crop_name:
+        return {
+            "success": False,
+            "message": "Crop name cannot be empty"
+        }
+
     conn = get_connection()
     cursor = conn.cursor()
 
-    cursor.execute("""
-        SELECT
-            market_name,
-            location,
-            price
-        FROM market_prices
-        WHERE LOWER(crop_name) = LOWER(%s)
-        ORDER BY price DESC
-    """, (request.crop_name,))
+    try:
+        cursor.execute("""
+            SELECT
+                market_name,
+                location,
+                price
+            FROM market_prices
+            WHERE LOWER(crop_name) = LOWER(%s)
+            ORDER BY price DESC
+        """, (crop_name,))
 
-    rows = cursor.fetchall()
+        rows = cursor.fetchall()
 
-    cursor.close()
-    conn.close()
+    finally:
+        cursor.close()
+        conn.close()
 
     if not rows:
         return {
@@ -64,8 +88,8 @@ def recommendation_engine(request: RecommendationRequest):
 
     return {
         "success": True,
-        "crop_name": request.crop_name,
-        "farmer_location": request.location,
+        "crop_name": crop_name,
+        "farmer_location": location,
         "quantity": request.quantity,
 
         "recommended_market": best_market[0],
@@ -93,7 +117,7 @@ def recommendation_engine(request: RecommendationRequest):
         "markets_analyzed": len(rows),
 
         "recommendation": (
-            f"Sell {request.crop_name} at "
+            f"Sell {crop_name} at "
             f"{best_market[0]} because it currently "
             f"offers the highest available market price."
         )
